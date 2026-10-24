@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qəşəy Film — Filmlər aləmi</title>
+<style>
+:root{--red:#e50914;--bg:#090909;--panel:#171717;--muted:#aaa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font-family:Arial,Helvetica,sans-serif}
+header{min-height:70px;display:flex;align-items:center;gap:20px;padding:12px 5%;position:sticky;top:0;z-index:5;background:#080808}
+.logo{font-size:25px;font-weight:900;color:var(--red);white-space:nowrap;letter-spacing:-1px}
+.logo span{color:#fff}nav{display:flex;gap:18px;font-size:14px}nav a{color:#ddd;text-decoration:none}
+.search{margin-left:auto;display:flex;align-items:center;background:#191919;border:1px solid #444;border-radius:8px;padding:8px 10px;gap:8px}
+.search input{width:150px;background:transparent;border:0;outline:0;color:#fff;font-size:14px}
+.admin-btn{background:var(--red);color:#fff;border:0;padding:8px 14px;border-radius:6px;font-weight:bold;cursor:pointer}
+.hero{min-height:430px;padding:75px 6% 45px;display:flex;align-items:end;background:linear-gradient(90deg,#080808 0%,rgba(8,8,8,.86) 35%,rgba(8,8,8,.2) 100%),linear-gradient(0deg,#090909 0%,transparent 65%),radial-gradient(ellipse at 75% 30%,#6c171b 0%,#321015 25%,#101010 65%)}
+.hero-content{max-width:560px}.eyebrow{color:#ff424b;font-weight:bold;letter-spacing:3px;font-size:12px}
+.hero h1{font-size:clamp(36px,6vw,65px);margin:12px 0}.hero p{color:#ddd;line-height:1.6;max-width:500px}
+.btn{border:0;border-radius:5px;padding:12px 18px;font-weight:bold;cursor:pointer;font-size:15px}
+.btn-primary{background:#fff;color:#111}.btn-secondary{background:#333;color:#fff;margin-left:8px}
+main{padding:0 5% 50px}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 25px}
+.toolbar h2{font-size:22px;margin-right:auto}.chip{background:#1c1c1c;border:1px solid #333;color:#ddd;border-radius:20px;padding:8px 13px;cursor:pointer}
+.chip.active,.chip:hover{background:var(--red);border-color:var(--red);color:#fff}.section-title{font-size:21px;margin:28px 0 15px}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:17px}
+.movie{min-width:0;cursor:pointer;transition:transform .2s;background:#141414;border-radius:8px;overflow:hidden;padding-bottom:10px}
+.movie:hover{transform:scale(1.03)}.poster{height:220px;overflow:hidden;position:relative;display:flex;align-items:end;padding:14px;background:linear-gradient(145deg,#50191c,#151515);box-shadow:inset 0 -100px 60px -50px #000}
+.poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.poster-title{font-size:22px;font-weight:900;line-height:1.05;text-shadow:0 2px 8px #000;z-index:1}
+.movie h3{font-size:14px;margin:10px 10px 5px}.meta{font-size:12px;color:var(--muted);margin:0 10px}
+.delete-btn{background:#ff4d4d;color:#fff;border:0;padding:7px;width:calc(100% - 20px);margin:10px;border-radius:4px;cursor:pointer;font-weight:bold}
+.empty{display:none;color:#bbb;padding:25px 0}.footer{border-top:1px solid #222;color:#888;padding:25px 5%;font-size:12px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.modal.show{display:flex}.modal-box{width:min(900px,100%);background:#151515;border:1px solid #333;border-radius:12px;overflow:hidden}
+.modal-head{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #222}.modal-head strong{margin-right:auto}
+.close{background:none;border:0;color:#fff;font-size:28px;cursor:pointer}.player{background:#000;aspect-ratio:16/9;display:grid;place-items:center;color:#ccc;text-align:center}
+.player video,.player iframe{width:100%;height:100%;border:0}.modal-info{padding:16px;color:#bbb;font-size:14px}.modal-info h2{color:#fff;margin:0 0 8px}
+.admin-box{max-width:440px;width:95%;max-height:90vh;overflow:auto;background:#1c1c1c;padding:25px;border-radius:10px;border:1px solid #333}
+.admin-box h3{margin-top:0;color:var(--red)}.warning{color:#ffcc00;font-size:13px;background:rgba(255,204,0,.1);padding:10px;border-radius:4px;line-height:1.5}
+.admin-box input,.admin-box textarea,.admin-box select{width:100%;padding:10px;margin-bottom:10px;background:#2b2b2b;border:1px solid #444;color:#fff;border-radius:5px}
+.admin-box button.action{width:100%;padding:10px;background:var(--red);color:#fff;border:0;border-radius:5px;font-weight:bold;cursor:pointer}
+.admin-box textarea{min-height:75px;resize:vertical}.form-label{font-size:12px;color:#ccc;display:block;margin:3px 0 5px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}nav{display:none}}
+@media(max-width:560px){header{padding:10px 4%;gap:10px;flex-wrap:wrap}.logo{font-size:21px}.search{order:3;margin-left:0;flex:1}.search input{width:100%}.admin-btn{margin-left:auto}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.poster{height:200px}.hero{min-height:390px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">QƏŞƏY <span>FİLM</span></div>
+  <nav><a href="#home">Ana səhifə</a><a href="#films">Filmlər</a></nav>
+  <label class="search">⌕ <input id="search" placeholder="Film axtar..." aria-label="Film axtar"></label>
+  <button class="admin-btn" onclick="openAdminModal()">Admin Girişi</button>
+</header>
+<section class="hero" id="home">
+  <div class="hero-content">
+    <div class="eyebrow">QƏŞƏY FİLMƏ XOŞ GƏLMİSİNİZ</div>
+    <h1>Film dünyasına<br>xoş gəlmisən.</h1>
+    <p>Dünyanın müxtəlif ölkələrindən filmləri kəşf et. Sevdiyin janrı seç, axtar və izləməyə başla.</p>
+    <button class="btn btn-primary" id="featuredPlay">▶ Nümunə videoya bax</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('films').scrollIntoView({behavior:'smooth'})">Filmləri kəşf et</button>
+  </div>
+</section>
+<main id="films">
+  <div class="toolbar">
+    <h2>Filmləri kəşf et</h2>
+    <button class="chip active" data-genre="Hamısı">Hamısı</button>
+    <button class="chip" data-genre="Dram">Dram</button>
+    <button class="chip" data-genre="Aksiyon">Aksiyon</button>
+    <button class="chip" data-genre="Komediya">Komediya</button>
+    <button class="chip" data-genre="Fantastika">Fantastika</button>
+    <button class="chip" data-genre="Animasiya">Animasiya</button>
+  </div>
+  <h2 class="section-title">Populyar seçimlər</h2>
+  <div class="grid" id="grid"></div><div class="empty" id="empty">Axtarışa uyğun film tapılmadı.</div>
+</main>
+<footer class="footer">© 2026 Qəşəy Film · Film sevənlər üçün hazırlanıb.</footer>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-head"><strong id="modalTop">Qəşəy Film</strong><button class="close" onclick="closeModal()" aria-label="Bağla">×</button></div>
+    <div class="player" id="player"></div>
+    <div class="modal-info"><h2 id="modalTitle"></h2><div id="modalMeta"></div><p id="modalDesc"></p></div>
+  </div>
+</div>
+
+<div class="modal" id="adminModal" onclick="if(event.target===this)closeAdminModal()">
+  <div class="admin-box">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3>Admin Paneli</h3><button class="close" style="width:auto;padding:0" onclick="closeAdminModal()" aria-label="Bağla">×</button></div>
+    <p class="warning">🔒 Bu bölməyə yalnız saytın admini daxil ola bilər. Müştərilər buradan film əlavə edə və silə bilməz.</p>
+    <div id="adminLoginForm">
+      <label class="form-label" for="adminPassInput">Admin kodu</label>
+      <input type="password" id="adminPassInput" placeholder="Admin kodunu yazın..." autocomplete="current-password">
+      <button class="action" onclick="loginAdmin()">Daxil ol</button>
+    </div>
+    <div id="adminAddForm" style="display:none">
+      <p style="color:#ddd;font-size:13px">Admin girişi aktivdir. Film məlumatlarını doldur.</p>
+      <label class="form-label" for="mTitle">Filmin adı *</label><input id="mTitle" placeholder="Filmin adı">
+      <label class="form-label" for="mYear">İl</label><input type="number" id="mYear" placeholder="2024">
+      <label class="form-label" for="mCountry">Ölkə</label><input id="mCountry" placeholder="Azərbaycan">
+      <label class="form-label" for="mGenre">Janr</label>
+      <select id="mGenre"><option value="Aksiyon">Aksiyon</option><option value="Dram">Dram</option><option value="Komediya">Komediya</option><option value="Fantastika">Fantastika</option><option value="Animasiya">Animasiya</option></select>
+      <label class="form-label" for="mDesc">Film haqqında</label><textarea id="mDesc" placeholder="Film haqqında qısa məlumat..."></textarea>
+      <label class="form-label" for="mPoster">Afişa şəkli linki</label><input type="url" id="mPoster" placeholder="https://...">
+      <label class="form-label" for="mTrailer">Treyler linki (istəyə görə)</label><input type="url" id="mTrailer" placeholder="MP4 video linki">
+      <label class="form-label" for="mVideo">Film video linki (MP4)</label><input type="url" id="mVideo" placeholder="https://.../film.mp4">
+      <button class="action" onclick="addMovie()">Filmi sayta əlavə et</button>
+      <button class="action" style="margin-top:8px;background:#444" onclick="adminLogout()">Admin çıxışı</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'qeseyFilmMovies';
+const sampleMovie = {
+  id: 1, title: 'Big Buck Bunny', year: 2008, country: 'ABŞ', genre: 'Animasiya',
+  desc: 'Bu nümunə video pleyerin işləməsini yoxlamaq üçündür.',
+  poster: '', trailer: '', video: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+};
+let movies = loadMovies();
+let isAdmin = false;
+let activeGenre = 'Hamısı';
+const grid = document.getElementById('grid');
+const search = document.getElementById('search');
+
+function loadMovies(){
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved === null ? [sampleMovie] : JSON.parse(saved);
+  } catch(e) { return [sampleMovie]; }
+}
+function saveMovies(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(movies)); }
+function safeUrl(value){
+  try { const u = new URL(value); return ['http:','https:'].includes(u.protocol) ? u.href : ''; }
+  catch { return ''; }
+}
+function render(){
+  const q = search.value.trim().toLocaleLowerCase('az');
+  const filtered = movies.filter(m =>
+    (activeGenre === 'Hamısı' || m.genre === activeGenre) &&
+    (`${m.title} ${m.country} ${m.genre} ${m.year}`.toLocaleLowerCase('az').includes(q))
+  );
+  grid.replaceChildren();
+  filtered.forEach(m => {
+    const card = document.createElement('article'); card.className = 'movie';
+    const poster = document.createElement('div'); poster.className = 'poster'; poster.onclick = () => openMovie(m.id);
+    if(m.poster && safeUrl(m.poster)){ const img = document.createElement('img'); img.src = safeUrl(m.poster); img.alt = m.title + ' afişası'; img.loading = 'lazy'; poster.appendChild(img); }
+    const pt = document.createElement('div'); pt.className = 'poster-title'; pt.textContent = m.title; poster.appendChild(pt);
+    const title = document.createElement('h3'); title.textContent = m.title;
+    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `${m.year || 'İl məlum deyil'} · ${m.country || 'Ölkə məlum deyil'} · ${m.genre}`;
+    card.append(poster,title,meta);
+    if(isAdmin){ const del = document.createElement('button'); del.className='delete-btn'; del.textContent='Filmi sil'; del.onclick=()=>deleteMovie(m.id); card.appendChild(del); }
+    grid.appendChild(card);
+  });
+  document.getElementById('empty').style.display = filtered.length ? 'none' : 'block';
+}
+function openMovie(id){
+  const m = movies.find(x => x.id === id); if(!m) return;
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('modalTop').textContent = m.title;
+  document.getElementById('modalTitle').textContent = m.title;
+  document.getElementById('modalMeta').textContent = `${m.year || ''} · ${m.country || ''} · ${m.genre}`;
+  document.getElementById('modalDesc').textContent = m.desc || '';
+  const p = document.getElementById('player'); p.replaceChildren();
+  const videoUrl = safeUrl(m.trailer) || safeUrl(m.video);
+  if(videoUrl){
+    const v=document.createElement('video'); v.src=videoUrl; v.controls=true; v.playsInline=true; p.appendChild(v);
+    v.play().catch(()=>{});
+  } else { p.textContent='Video linki əlavə olunmayıb.'; }
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); document.getElementById('player').replaceChildren(); }
+function openAdminModal(){
+  document.getElementById('adminModal').classList.add('show');
+  document.getElementById('adminPassInput').value='';
+  document.getElementById('adminLoginForm').style.display = isAdmin ? 'none':'block';
+  document.getElementById('adminAddForm').style.display = isAdmin ? 'block':'none';
+}
+function closeAdminModal(){ document.getElementById('adminModal').classList.remove('show'); }
+function loginAdmin(){
+  const pass=document.getElementById('adminPassInput').value;
+  if(pass === 'turan2010'){
+    isAdmin=true;
+    document.getElementById('adminLoginForm').style.display='none';
+    document.getElementById('adminAddForm').style.display='block';
+    render(); alert('Admin girişi uğurludur!');
+  } else { alert('Səhv kod! Bu bölməyə yalnız admin daxil ola bilər.'); }
+}
+function adminLogout(){ isAdmin=false; document.getElementById('adminLoginForm').style.display='block'; document.getElementById('adminAddForm').style.display='none'; render(); closeAdminModal(); }
+function addMovie(){
+  const title=document.getElementById('mTitle').value.trim();
+  const year=Number(document.getElementById('mYear').value) || new Date().getFullYear();
+  const country=document.getElementById('mCountry').value.trim() || 'Azərbaycan';
+  const genre=document.getElementById('mGenre').value;
+  const desc=document.getElementById('mDesc').value.trim();
+  const poster=safeUrl(document.getElementById('mPoster').value.trim());
+  const trailer=safeUrl(document.getElementById('mTrailer').value.trim());
+  const video=safeUrl(document.getElementById('mVideo').value.trim());
+  if(!title || !video){ alert('Filmin adını və video linkini daxil et!'); return; }
+  movies.push({id:Date.now(),title,year,country,genre,desc,poster,trailer,video});
+  try { saveMovies(); } catch(e) { alert('Yaddaş doludur. Daha kiçik afişa linki istifadə et.'); return; }
+  ['mTitle','mYear','mCountry','mDesc','mPoster','mTrailer','mVideo'].forEach(id=>document.getElementById(id).value='');
+  alert('Film əlavə edildi!'); closeAdminModal(); render();
+}
+function deleteMovie(id){
+  if(!isAdmin) return;
+  if(confirm('Bu filmi silmək istəyirsən?')){
+    movies=movies.filter(m=>m.id!==id); saveMovies(); render();
+  }
+}
+search.addEventListener('input',render);
+document.querySelectorAll('[data-genre]').forEach(b=>b.addEventListener('click',()=>{
+  activeGenre=b.dataset.genre;
+  document.querySelectorAll('[data-genre]').forEach(x=>x.classList.toggle('active',x===b)); render();
+}));
+document.getElementById('featuredPlay').addEventListener('click',()=>{ if(movies.length) openMovie(movies[0].id); });
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAdminModal();}});
+render();
+</script>
+</body>
+</html>
