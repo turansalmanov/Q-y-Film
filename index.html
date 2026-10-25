@@ -29,6 +29,8 @@ nav{display:flex;gap:15px;font-size:14px}nav a{color:#ddd;text-decoration:none;c
 .sidebar-header h3{color:var(--red);margin:0}
 .sidebar-section{margin-bottom:25px}
 .sidebar-section h4{font-size:14px;color:#888;margin-bottom:10px;text-transform:uppercase}
+.sidebar-section button{display:block;width:100%;text-align:left;background:#1f1f1f;border:0;color:#ddd;padding:8px;margin-bottom:6px;border-radius:4px;cursor:pointer;font-size:13px}
+.sidebar-section button:hover{background:var(--red);color:#fff}
 
 .hero{position:relative;height:440px;background:radial-gradient(circle at center, #2b0003 0%, #090909 70%), #090909;display:flex;align-items:center;padding:0 6%;border-bottom:2px solid #220002}
 .hero-content{max-width:700px;z-index:2}
@@ -84,16 +86,16 @@ main{padding:0 5% 50px}
     <button class="close" onclick="toggleSidebar()">×</button>
   </div>
   
-  <div class="sidebar-section" id="sidebarUserAuth" style="padding-bottom:15px; border-bottom:1px solid #333;"></div>
+  <div class="sidebar-section" id="sidebarUserAuth" style="padding-bottom:15px; border-bottom:1px solid #333; color:#fff; font-weight:bold;"></div>
 
   <div class="sidebar-section">
     <h4>Sevimli Filmlər</h4>
-    <div id="sidebarFavList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div id="sidebarFavList" style="display:flex; flex-direction:column; gap:6px;"></div>
   </div>
 
   <div class="sidebar-section">
     <h4>Son İzlədiklərim</h4>
-    <div id="sidebarHistoryList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div id="sidebarHistoryList" style="display:flex; flex-direction:column; gap:6px;"></div>
   </div>
 </div>
 
@@ -235,22 +237,75 @@ let movies=[],isAdmin=false,currentUser=null,activeGenre='Hamısı',favorites=[]
 const $=id=>document.getElementById(id);
 async function api(url,opts={}){const r=await fetch(url,{credentials:'same-origin',...opts});const d=await r.json().catch(()=>({error:'Server cavab vermədi'}));if(!r.ok)throw Error(d.error||'Xəta');return d}
 async function init(){try{let s=await api('/api/session');currentUser=s.user;isAdmin=s.isAdmin;if(currentUser||isAdmin)movies=await api('/api/movies');render()}catch(e){console.error(e);}}
-function checkUserSession(){const logged=!!currentUser||isAdmin;$('navAuthBtn').style.display=logged?'none':'inline-block';$('logoutBtn').style.display=logged?'inline-block':'none';$('filmsMain').style.display=logged?'block':'none';$('lockMessage').style.display=logged?'none':'block';$('sidebarUserAuth').textContent=logged?(isAdmin?'Admin hesabı':currentUser):'Qeydiyyat edib daxil olun.'}
+function checkUserSession(){const logged=!!currentUser||isAdmin;$('navAuthBtn').style.display=logged?'none':'inline-block';$('logoutBtn').style.display=logged?'inline-block':'none';$('filmsMain').style.display=logged?'block':'none';$('lockMessage').style.display=logged?'none':'block';
+  if(isAdmin){$('sidebarUserAuth').textContent='Hesab: admin';}
+  else if(currentUser){$('sidebarUserAuth').textContent='Hesab: '+currentUser;}
+  else{$('sidebarUserAuth').textContent='Qeydiyyat edib daxil olun.';}
+}
 function checkAccessAndScroll(){if(!currentUser&&!isAdmin){openAuthModal('register');return}$('filmsMain').scrollIntoView({behavior:'smooth'})}
 function toggleSidebar(){$('favSidebar').classList.toggle('open');renderSidebarContent()}
-function renderSidebarContent(){const f=$('sidebarFavList'),h=$('sidebarHistoryList');f.replaceChildren();h.replaceChildren();if(!currentUser&&!isAdmin){f.textContent='Giriş edin.';h.textContent='Giriş edin.';return}for(const m of movies.filter(x=>favorites.includes(x.id))){let b=document.createElement('button');b.textContent=m.title;b.onclick=()=>openMovie(m.id);f.appendChild(b)}for(const m of historyList.map(id=>movies.find(x=>x.id===id)).filter(Boolean)){let b=document.createElement('button');b.textContent=m.title;b.onclick=()=>openMovie(m.id);h.appendChild(b)}}
+function renderSidebarContent(){
+  const f=$('sidebarFavList'),h=$('sidebarHistoryList');
+  f.replaceChildren();h.replaceChildren();
+  if(!currentUser&&!isAdmin){f.textContent='Giriş edin.';h.textContent='Giriş edin.';return}
+  
+  let favMovies=movies.filter(x=>favorites.includes(x.id));
+  if(favMovies.length===0){let d=document.createElement('div');d.style.color='#777';d.style.fontSize='12px';d.textContent='Sevimli film yoxdur.';f.appendChild(d);}
+  for(const m of favMovies){let b=document.createElement('button');b.textContent='❤ '+m.title;b.onclick=()=>openMovie(m.id);f.appendChild(b)}
+  
+  let histMovies=historyList.map(id=>movies.find(x=>x.id===id)).filter(Boolean);
+  if(histMovies.length===0){let d=document.createElement('div');d.style.color='#777';d.style.fontSize='12px';d.textContent='Hələ heç nə izlənməyib.';h.appendChild(d);}
+  for(const m of histMovies){let b=document.createElement('button');b.textContent='▶ '+m.title;b.onclick=()=>openMovie(m.id);h.appendChild(b)}
+}
 function render(){checkUserSession();if(!currentUser&&!isAdmin)return;let q=$('search').value.trim().toLocaleLowerCase('az');let filtered=movies.filter(m=>(activeGenre==='Hamısı'||m.genre===activeGenre)&&(`${m.title} ${m.country} ${m.genre} ${m.year}`).toLocaleLowerCase('az').includes(q));let grid=$('grid');grid.replaceChildren();for(const m of filtered){let card=document.createElement('article');card.className='movie';let fav=document.createElement('button');fav.className='fav-btn '+(favorites.includes(m.id)?'active':'');fav.textContent='♥';fav.onclick=e=>{e.stopPropagation();favorites=favorites.includes(m.id)?favorites.filter(x=>x!==m.id):[...favorites,m.id];render()};card.appendChild(fav);let poster=document.createElement('div');poster.className='poster';poster.onclick=()=>openMovie(m.id);if(m.poster){let img=document.createElement('img');img.src=m.poster;img.alt=m.title;poster.appendChild(img)}let pt=document.createElement('div');pt.className='poster-title';pt.textContent=m.title;poster.appendChild(pt);let title=document.createElement('h3');title.textContent=m.title;let meta=document.createElement('div');meta.className='meta';meta.textContent=`${m.year||''} · ${m.country||''} · ${m.genre||''}`;card.append(poster,title,meta);if(isAdmin){let a=document.createElement('div');a.className='movie-actions';let d=document.createElement('button');d.className='delete-btn';d.textContent='Sil';d.onclick=()=>deleteMovie(m.id);a.appendChild(d);card.appendChild(a)}grid.appendChild(card)}$('empty').style.display=filtered.length?'none':'block';renderSidebarContent()}
-function openMovie(id){let m=movies.find(x=>x.id===id);if(!m)return;historyList=[id,...historyList.filter(x=>x!==id)].slice(0,10);$('modal').classList.add('show');$('modalTop').textContent=m.title;$('modalTitle').textContent=m.title;$('modalMeta').textContent=`${m.year||''} · ${m.country||''} · ${m.genre||''}`;$('modalDesc').textContent=m.desc||m.description||'';let p=$('player');p.replaceChildren();if(m.video){let v=document.createElement('video');v.src=m.video;v.controls=true;v.playsInline=true;p.appendChild(v)}else p.textContent='Video tapılmadı.'}
+function openMovie(id){let m=movies.find(x=>x.id===id);if(!m)return;historyList=[id,...historyList.filter(x=>x!==id)].slice(0,10);$('modal').classList.add('show');$('modalTop').textContent=m.title;$('modalTitle').textContent=m.title;$('modalMeta').textContent=`${m.year||''} · ${m.country||''} · ${m.genre||''}`;$('modalDesc').textContent=m.desc||m.description||'';let p=$('player');p.replaceChildren();if(m.video){let v=document.createElement('video');v.src=m.video;v.controls=true;v.playsInline=true;p.appendChild(v)}else p.textContent='Video tapılmadı.';renderSidebarContent()}
 function closeModal(){$('modal').classList.remove('show');$('player').replaceChildren()}
 function openAuthModal(tab='register'){$('authModal').classList.add('show');switchAuthTab(tab)}function closeAuthModal(){$('authModal').classList.remove('show')}
 function switchAuthTab(tab){$('registerFormSection').style.display=tab==='register'?'block':'none';$('loginFormSection').style.display=tab==='login'?'block':'none';$('authModalTitle').textContent=tab==='register'?'Müştəri Qeydiyyatı':'Müştəri Girişi'}
-async function registerUser(){try{let name=$('regName').value.trim(),email=$('regEmail').value.trim(),password=$('regPassword').value,code=$('regCode').value.trim();if(code!=='qeseyfilmplay2026')throw Error('Yanlış abunəlik kodu! Zəhmət olmasa düzgün kodu daxil edin.');await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});let s=await api('/api/session');currentUser=s.user;closeAuthModal();movies=await api('/api/movies');render();alert('Qeydiyyat uğurludur!')}catch(e){alert(e.message)}}
-async function loginUser(){try{await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});let s=await api('/api/session');currentUser=s.user;isAdmin=s.isAdmin;closeAuthModal();movies=await api('/api/movies');render()}catch(e){alert(e.message)}}
+async function registerUser(){
+  try{
+    let name=$('regName').value.trim(),email=$('regEmail').value.trim(),password=$('regPassword').value,code=$('regCode').value.trim();
+    if(!name)throw Error('Adınızı daxil edin.');
+    if(code!=='qeseyfilmplay2026')throw Error('Yanlış abunəlik kodu! Zəhmət olmasa düzgün kodu daxil edin.');
+    await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+    let s=await api('/api/session');
+    currentUser=s.user;
+    isAdmin=s.isAdmin;
+    closeAuthModal();
+    movies=await api('/api/movies');
+    render();
+    alert('Qeydiyyat uğurludur!');
+  }catch(e){alert(e.message)}
+}
+async function loginUser(){
+  try{
+    await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});
+    let s=await api('/api/session');
+    currentUser=s.user;
+    isAdmin=s.isAdmin;
+    closeAuthModal();
+    movies=await api('/api/movies');
+    render();
+  }catch(e){alert(e.message)}
+}
 async function logoutUser(){try{await api('/api/logout',{method:'POST'});currentUser=null;isAdmin=false;movies=[];render()}catch(e){alert(e.message)}}
 function confirmLogout(){if(confirm('Hesabdan çıxmaq istəyirsiniz?'))logoutUser()}
 function openAdminModal(){$('adminModal').classList.add('show');$('adminLoginForm').style.display=isAdmin?'none':'block';$('adminAddForm').style.display=isAdmin?'block':'none'}
 function closeAdminModal(){$('adminModal').classList.remove('show')}
-async function loginAdmin(){try{let pass=$('adminPassInput').value;if(pass!=='turan2010')throw Error('Yanlış admin kodu!');await api('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})});isAdmin=true;currentUser=null;$('adminLoginForm').style.display='none';$('adminAddForm').style.display='block';movies=await api('/api/movies');render();alert('Admin girişi uğurludur')}catch(e){alert(e.message)}}
+async function loginAdmin(){
+  try{
+    let pass=$('adminPassInput').value;
+    if(pass!=='turan2010')throw Error('Yanlış admin kodu!');
+    await api('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})});
+    isAdmin=true;
+    currentUser=null;
+    $('adminLoginForm').style.display='none';
+    $('adminAddForm').style.display='block';
+    movies=await api('/api/movies');
+    render();
+    alert('Admin girişi uğurludur');
+  }catch(e){alert(e.message)}
+}
 async function adminLogout(){await logoutUser();closeAdminModal()}
 async function saveMovieData(){try{let title=$('mTitle').value.trim(),poster=$('mPosterFile').files[0],video=$('mVideoFile').files[0];if(!title||!poster||!video)throw Error('Filmin adını, afişa şəkil faylını və video faylını seçin.');let fd=new FormData();fd.append('title',title);fd.append('year',$('mYear').value);fd.append('country',$('mCountry').value);fd.append('genre',$('mGenre').value);fd.append('desc',$('mDesc').value);fd.append('poster',poster);fd.append('video',video);let b=$('adminAddForm').querySelector('button.action');b.disabled=true;b.textContent='Yüklənir...';await api('/api/movies',{method:'POST',body:fd});movies=await api('/api/movies');$('mTitle').value='';$('mYear').value='';$('mCountry').value='';$('mDesc').value='';$('mPosterFile').value='';$('mVideoFile').value='';closeAdminModal();render();alert('Film əlavə edildi.')}catch(e){alert(e.message)}finally{let b=$('adminAddForm').querySelector('button.action');b.disabled=false;b.textContent='Filmi Yadda Saxla'}}
 async function deleteMovie(id){if(!confirm('Bu filmi silmək istəyirsiniz?'))return;try{await api('/api/movies/'+id,{method:'DELETE'});movies=await api('/api/movies');render()}catch(e){alert(e.message)}}
