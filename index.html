@@ -86,7 +86,10 @@ main{padding:0 5% 50px}
     <button class="close" onclick="toggleSidebar()">×</button>
   </div>
   
-  <div class="sidebar-section" id="sidebarUserAuth" style="padding-bottom:15px; border-bottom:1px solid #333; color:#fff; font-weight:bold;"></div>
+  <div class="sidebar-section" id="sidebarUserAuth" style="padding-bottom:15px; border-bottom:1px solid #333;">
+    <div id="sidebarAccountName" style="color:#fff; font-weight:bold; margin-bottom:8px;">Hesab: Yoxdur</div>
+    <button id="sidebarLogoutBtn" onclick="confirmLogout()" style="background:var(--red); color:#fff; display:none;">Çıxış Et</button>
+  </div>
 
   <div class="sidebar-section">
     <h4>Sevimli Filmlər</h4>
@@ -172,18 +175,18 @@ main{padding:0 5% 50px}
     <div id="registerFormSection">
       <p style="color:#ddd;font-size:13px">Yeni hesab yaradın:</p>
       <label class="form-label">Adınız (Hesab adı)</label>
-      <input type="text" id="regName" placeholder="Adınızı daxil edin...">
+      <input type="text" id="regName" autocomplete="off" placeholder="Adınızı daxil edin...">
       
       <label class="form-label">Düzgün Gmail ünvanı</label>
-      <input type="email" id="regEmail" placeholder="ornek@gmail.com">
+      <input type="email" id="regEmail" autocomplete="off" placeholder="ornek@gmail.com">
       
       <label class="form-label">Şifrə təyin edin</label>
-      <input type="password" id="regPassword" placeholder="Şifrənizi yazın...">
+      <input type="password" id="regPassword" autocomplete="new-password" placeholder="Şifrənizi yazın...">
       
       <label class="form-label">Abunəlik / Qeydiyyat Kodu *</label>
-      <input type="password" id="regCode" placeholder="Abunəlik kodunu daxil edin...">
+      <input type="password" id="regCode" autocomplete="new-password" placeholder="Abunəlik kodunu daxil edin...">
       
-      <button class="action" onclick="registerUser()">Qeydiyyatdan keç</button>
+      <button type="button" class="action" onclick="registerUser()">Qeydiyyatdan keç</button>
       <p style="text-align:center;font-size:13px;margin-top:10px;color:#aaa">Hesabınız var? <a style="color:var(--red);cursor:pointer;" onclick="switchAuthTab('login')">Daxil ol</a></p>
     </div>
 
@@ -191,12 +194,12 @@ main{padding:0 5% 50px}
       <p style="color:#ddd;font-size:13px">Gmail və şifrənizlə daxil olun:</p>
       
       <label class="form-label">Gmail ünvanınız</label>
-      <input type="email" id="loginEmail" placeholder="ornek@gmail.com">
+      <input type="email" id="loginEmail" autocomplete="off" placeholder="ornek@gmail.com">
       
       <label class="form-label">Şifrəniz</label>
-      <input type="password" id="loginPassword" placeholder="Şifrənizi daxil edin...">
+      <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Şifrənizi daxil edin...">
       
-      <button class="action" onclick="loginUser()">Daxil ol</button>
+      <button type="button" class="action" onclick="loginUser()">Daxil ol</button>
       <p style="text-align:center;font-size:13px;margin-top:10px;color:#aaa">Hesabınız yoxdur? <a style="color:var(--red);cursor:pointer;" onclick="switchAuthTab('register')">Qeydiyyat</a></p>
     </div>
   </div>
@@ -208,8 +211,8 @@ main{padding:0 5% 50px}
     <div id="adminLoginForm">
       <p class="warning">🔒 Yalnız admin daxil ola bilər.</p>
       <label class="form-label">Admin kodu</label>
-      <input type="password" id="adminPassInput" placeholder="Şifrəni daxil edin...">
-      <button class="action" onclick="loginAdmin()">Daxil ol</button>
+      <input type="password" id="adminPassInput" autocomplete="new-password" placeholder="Şifrəni daxil edin...">
+      <button type="button" class="action" onclick="loginAdmin()">Daxil ol</button>
     </div>
     <div id="adminAddForm" style="display:none">
       <p style="color:#ddd;font-size:13px">Film faylı və afişa yükləyin:</p>
@@ -226,8 +229,8 @@ main{padding:0 5% 50px}
       <label class="form-label">Film Video Faylı (Video seçin - MP4 və s.) *</label>
       <input type="file" id="mVideoFile" accept="video/*">
       
-      <button class="action" onclick="saveMovieData()">Filmi Yadda Saxla</button>
-      <button class="action" style="margin-top:8px;background:#444" onclick="adminLogout()">Admin Çıxışı</button>
+      <button type="button" class="action" onclick="saveMovieData()">Filmi Yadda Saxla</button>
+      <button type="button" class="action" style="margin-top:8px;background:#444" onclick="adminLogout()">Admin Çıxışı</button>
     </div>
   </div>
 </div>
@@ -237,18 +240,34 @@ let movies=[],isAdmin=false,currentUser=null,activeGenre='Hamısı',favorites=[]
 const $=id=>document.getElementById(id);
 async function api(url,opts={}){const r=await fetch(url,{credentials:'same-origin',...opts});const d=await r.json().catch(()=>({error:'Server cavab vermədi'}));if(!r.ok)throw Error(d.error||'Xəta');return d}
 async function init(){try{let s=await api('/api/session');currentUser=s.user;isAdmin=s.isAdmin;if(currentUser||isAdmin)movies=await api('/api/movies');render()}catch(e){console.error(e);}}
-function checkUserSession(){const logged=!!currentUser||isAdmin;$('navAuthBtn').style.display=logged?'none':'inline-block';$('logoutBtn').style.display=logged?'inline-block':'none';$('filmsMain').style.display=logged?'block':'none';$('lockMessage').style.display=logged?'none':'block';
-  if(isAdmin){$('sidebarUserAuth').textContent='Hesab: admin';}
-  else if(currentUser){$('sidebarUserAuth').textContent='Hesab: '+currentUser;}
-  else{$('sidebarUserAuth').textContent='Qeydiyyat edib daxil olun.';}
+function checkUserSession(){
+  const logged=!!currentUser||isAdmin;
+  $('navAuthBtn').style.display=logged?'none':'inline-block';
+  $('logoutBtn').style.display=logged?'inline-block':'none';
+  $('filmsMain').style.display=logged?'block':'none';
+  $('lockMessage').style.display=logged?'none':'block';
+  
+  if(isAdmin){
+    $('sidebarAccountName').textContent='Hesab: admin';
+    $('sidebarLogoutBtn').style.display='block';
+  }else if(currentUser){
+    $('sidebarAccountName').textContent='Hesab: '+currentUser;
+    $('sidebarLogoutBtn').style.display='block';
+  }else{
+    $('sidebarAccountName').textContent='Hesab: Yoxdur (Giriş edilməyib)';
+    $('sidebarLogoutBtn').style.display='none';
+  }
 }
 function checkAccessAndScroll(){if(!currentUser&&!isAdmin){openAuthModal('register');return}$('filmsMain').scrollIntoView({behavior:'smooth'})}
 function toggleSidebar(){$('favSidebar').classList.toggle('open');renderSidebarContent()}
 function renderSidebarContent(){
   const f=$('sidebarFavList'),h=$('sidebarHistoryList');
   f.replaceChildren();h.replaceChildren();
-  if(!currentUser&&!isAdmin){f.textContent='Giriş edin.';h.textContent='Giriş edin.';return}
-  
+  if(!currentUser&&!isAdmin){
+    let d1=document.createElement('div');d1.style.color='#777';d1.style.fontSize='12px';d1.textContent='Giriş edin.';f.appendChild(d1);
+    let d2=document.createElement('div');d2.style.color='#777';d2.style.fontSize='12px';d2.textContent='Giriş edin.';h.appendChild(d2);
+    return;
+  }
   let favMovies=movies.filter(x=>favorites.includes(x.id));
   if(favMovies.length===0){let d=document.createElement('div');d.style.color='#777';d.style.fontSize='12px';d.textContent='Sevimli film yoxdur.';f.appendChild(d);}
   for(const m of favMovies){let b=document.createElement('button');b.textContent='❤ '+m.title;b.onclick=()=>openMovie(m.id);f.appendChild(b)}
@@ -266,6 +285,8 @@ async function registerUser(){
   try{
     let name=$('regName').value.trim(),email=$('regEmail').value.trim(),password=$('regPassword').value,code=$('regCode').value.trim();
     if(!name)throw Error('Adınızı daxil edin.');
+    if(!email)throw Error('Gmail ünvanınızı daxil edin.');
+    if(!password)throw Error('Şifrə daxil edin.');
     if(code!=='qeseyfilmplay2026')throw Error('Yanlış abunəlik kodu! Zəhmət olmasa düzgün kodu daxil edin.');
     await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
     let s=await api('/api/session');
@@ -279,7 +300,9 @@ async function registerUser(){
 }
 async function loginUser(){
   try{
-    await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('loginEmail').value.trim(),password:$('loginPassword').value})});
+    let email=$('loginEmail').value.trim(),password=$('loginPassword').value;
+    if(!email||!password)throw Error('Gmail və şifrəni daxil edin.');
+    await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
     let s=await api('/api/session');
     currentUser=s.user;
     isAdmin=s.isAdmin;
@@ -288,7 +311,7 @@ async function loginUser(){
     render();
   }catch(e){alert(e.message)}
 }
-async function logoutUser(){try{await api('/api/logout',{method:'POST'});currentUser=null;isAdmin=false;movies=[];render()}catch(e){alert(e.message)}}
+async function logoutUser(){try{await api('/api/logout',{method:'POST'});currentUser=null;isAdmin=false;movies=[];render();toggleSidebar()}catch(e){alert(e.message)}}
 function confirmLogout(){if(confirm('Hesabdan çıxmaq istəyirsiniz?'))logoutUser()}
 function openAdminModal(){$('adminModal').classList.add('show');$('adminLoginForm').style.display=isAdmin?'none':'block';$('adminAddForm').style.display=isAdmin?'block':'none'}
 function closeAdminModal(){$('adminModal').classList.remove('show')}
