@@ -1,4 +1,3 @@
-
 const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
@@ -62,12 +61,12 @@ function requireAdmin(req, res, next) {
 }
 
 app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "indeks.html"));
 });
 
 app.get("/api/session", (req, res) => {
   res.json({
-    user: req.session.user || null,
+    user: req.session.user ? req.session.user.name : null,
     isAdmin: !!req.session.admin
   });
 });
@@ -76,8 +75,9 @@ app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password } = req.body || {};
     const mail = String(email || "").trim().toLowerCase();
+    const userName = String(name || "").trim();
 
-    if (!name || !mail || !password) {
+    if (!userName || !mail || !password) {
       return res.status(400).json({ error: "Bütün xanaları doldurun." });
     }
 
@@ -85,18 +85,15 @@ app.post("/api/register", async (req, res) => {
       return res.status(409).json({ error: "Bu hesab artıq mövcuddur." });
     }
 
-    if (String(password).length < 8) {
-      return res.status(400).json({ error: "Şifrə ən azı 8 simvol olmalıdır." });
-    }
-
     const hash = await bcrypt.hash(String(password), 10);
-    const user = { name: String(name).trim(), email: mail, hash };
+    const user = { name: userName, email: mail, hash };
 
     users.set(mail, user);
-    req.session.user = { name: user.name, email: mail };
+    req.session.user = { name: userName, email: mail };
+    req.session.admin = false;
 
     res.json({ ok: true });
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: "Qeydiyyat alınmadı." });
   }
 });
@@ -170,6 +167,44 @@ app.post(
     };
 
     movies.unshift(movie);
+    res.json({ ok: true, movie });
+  }
+);
+
+app.put(
+  "/api/movies/:id",
+  requireAdmin,
+  upload.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "video", maxCount: 1 }
+  ]),
+  (req, res) => {
+    const movieId = Number(req.params.id);
+    const movie = movies.find(m => m.id === movieId);
+
+    if (!movie) {
+      return res.status(404).json({ error: "Film tapılmadı." });
+    }
+
+    const title = String(req.body.title || "").trim();
+    if (title) movie.title = title;
+    if (req.body.year !== undefined) movie.year = req.body.year;
+    if (req.body.country !== undefined) movie.country = req.body.country;
+    if (req.body.genre !== undefined) movie.genre = req.body.genre;
+    if (req.body.desc !== undefined) movie.desc = req.body.desc;
+
+    if (req.files?.poster?.[0]) {
+      const poster = req.files.poster[0];
+      fs.promises.unlink(path.join(UPLOAD_DIR, path.basename(movie.poster))).catch(() => {});
+      movie.poster = "/uploads/" + poster.filename;
+    }
+
+    if (req.files?.video?.[0]) {
+      const video = req.files.video[0];
+      fs.promises.unlink(path.join(UPLOAD_DIR, path.basename(movie.video))).catch(() => {});
+      movie.video = "/uploads/" + video.filename;
+    }
+
     res.json({ ok: true, movie });
   }
 );
