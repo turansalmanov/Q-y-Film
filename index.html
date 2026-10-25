@@ -83,12 +83,12 @@ main{padding:0 5% 50px}
 <div class="sidebar" id="favSidebar">
   <div class="sidebar-header">
     <h3>Menyu</h3>
-    <button class="close" onclick="toggleSidebar()">×</button>
+    <button type="button" class="close" onclick="toggleSidebar()">×</button>
   </div>
   
   <div class="sidebar-section" id="sidebarUserAuth" style="padding-bottom:15px; border-bottom:1px solid #333;">
     <div id="sidebarAccountName" style="color:#fff; font-weight:bold; margin-bottom:8px;">Hesab: Yoxdur</div>
-    <button id="sidebarLogoutBtn" onclick="confirmLogout()" style="background:var(--red); color:#fff; display:none;">Çıxış Et</button>
+    <button type="button" id="sidebarLogoutBtn" onclick="confirmLogout()" style="background:var(--red); color:#fff; display:none;">Çıxış Et</button>
   </div>
 
   <div class="sidebar-section">
@@ -103,7 +103,7 @@ main{padding:0 5% 50px}
 </div>
 
 <header>
-  <button class="menu-toggle" onclick="toggleSidebar()" title="Menyu">
+  <button type="button" class="menu-toggle" onclick="toggleSidebar()" title="Menyu">
     <span></span><span></span><span></span>
   </button>
   
@@ -118,11 +118,11 @@ main{padding:0 5% 50px}
   </nav>
   
   <div id="userHeaderArea" style="display:flex; align-items:center; gap:10px;">
-    <button class="auth-top-btn" id="navAuthBtn" onclick="openAuthModal('register')">Qeydiyyat / Giriş</button>
-    <button class="action" id="logoutBtn" style="display:none; padding:5px 10px; font-size:12px; background:#333; margin:0;" onclick="confirmLogout()">Çıxış Et</button>
+    <button type="button" class="auth-top-btn" id="navAuthBtn" onclick="openAuthModal('register')">Qeydiyyat / Giriş</button>
+    <button type="button" class="action" id="logoutBtn" style="display:none; padding:5px 10px; font-size:12px; background:#333; margin:0;" onclick="confirmLogout()">Çıxış Et</button>
   </div>
 
-  <button class="admin-btn" onclick="openAdminModal()">Admin Girişi</button>
+  <button type="button" class="admin-btn" onclick="openAdminModal()">Admin Girişi</button>
 
   <label class="search">⌕ <input id="search" placeholder="Film axtar..." aria-label="Film axtar"></label>
 </header>
@@ -132,19 +132,19 @@ main{padding:0 5% 50px}
     <div class="eyebrow">AZƏRBAYCAN DUBLAJLI KİNOLAR</div>
     <h1>Dünyanın ən maraqlı filmlərini Azərbaycan dublajı ilə kəşf və keyf edin</h1>
     <p>Ən sevilən və seçilmiş filmləri Qəşəy Film saytı ilə izləyin. Xoş izləmələr!</p>
-    <button class="btn btn-primary" onclick="checkAccessAndScroll()">Kinolara Bax</button>
+    <button type="button" class="btn btn-primary" onclick="checkAccessAndScroll()">Kinolara Bax</button>
   </div>
 </section>
 
 <main id="filmsMain" style="display:none;">
   <div class="toolbar">
     <h2 id="sectionHeading">Kinolar</h2>
-    <button class="chip active" data-genre="Hamısı">Hamısı</button>
-    <button class="chip" data-genre="Dram">Dram</button>
-    <button class="chip" data-genre="Aksiyon">Aksiyon</button>
-    <button class="chip" data-genre="Komediya">Komediya</button>
-    <button class="chip" data-genre="Fantastika">Fantastika</button>
-    <button class="chip" data-genre="Animasiya">Animasiya</button>
+    <button type="button" class="chip active" data-genre="Hamısı">Hamısı</button>
+    <button type="button" class="chip" data-genre="Dram">Dram</button>
+    <button type="button" class="chip" data-genre="Aksiyon">Aksiyon</button>
+    <button type="button" class="chip" data-genre="Komediya">Komediya</button>
+    <button type="button" class="chip" data-genre="Fantastika">Fantastika</button>
+    <button type="button" class="chip" data-genre="Animasiya">Animasiya</button>
   </div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty">Admin hələ heç bir film əlavə etməyib.</div>
@@ -152,14 +152,14 @@ main{padding:0 5% 50px}
 
 <div id="lockMessage" style="text-align:center; padding:60px 20px;">
   <h2 style="color:#ff3333;">Kinoları görmək üçün zəhmət olmasa qeydiyyatdan keçin və ya daxil olun!</h2>
-  <button class="btn btn-primary" onclick="openAuthModal('register')" style="margin-top:15px;">Qeydiyyat / Giriş Et</button>
+  <button type="button" class="btn btn-primary" onclick="openAuthModal('register')" style="margin-top:15px;">Qeydiyyat / Giriş Et</button>
 </div>
 
 <footer class="footer">© 2026 Qəşəy Film · Bütün hüquqlar qorunur.</footer>
 
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
-    <div class="modal-head"><strong id="modalTop">Qəşəy Film</strong><button class="close" onclick="closeModal()">×</button></div>
+    <div class="modal-head"><strong id="modalTop">Qəşəy Film</strong><button type="button" class="close" onclick="closeModal()">×</button></div>
     <div class="player" id="player"></div>
     <div class="modal-info"><h2 id="modalTitle"></h2><div id="modalMeta"></div><p id="modalDesc"></p></div>
   </div>
@@ -240,10 +240,14 @@ let movies=[],isAdmin=false,currentUser=null,activeGenre='Hamısı',favorites=[]
 const $=id=>document.getElementById(id);
 
 async function api(url,opts={}){
-  const r=await fetch(url,{credentials:'include',...opts});
-  const d=await r.json().catch(()=>({error:'Server cavab vermədi'}));
-  if(!r.ok)throw Error(d.error||'Xəta');
-  return d;
+  try{
+    const r=await fetch(url,{credentials:'include',...opts});
+    const d=await r.json().catch(()=>({error:'Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.'}));
+    if(!r.ok)throw Error(d.error||'Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
+    return d;
+  }catch(err){
+    throw Error('Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
+  }
 }
 
 async function init(){
@@ -300,11 +304,11 @@ function renderSidebarContent(){
   }
   let favMovies=movies.filter(x=>favorites.includes(x.id));
   if(favMovies.length===0){let d=document.createElement('div');d.style.color='#777';d.style.fontSize='12px';d.textContent='Sevimli film yoxdur.';f.appendChild(d);}
-  for(const m of favMovies){let b=document.createElement('button');b.textContent='❤ '+m.title;b.onclick=()=>openMovie(m.id);f.appendChild(b)}
+  for(const m of favMovies){let b=document.createElement('button');b.type='button';b.textContent='❤ '+m.title;b.onclick=()=>openMovie(m.id);f.appendChild(b)}
   
   let histMovies=historyList.map(id=>movies.find(x=>x.id===id)).filter(Boolean);
   if(histMovies.length===0){let d=document.createElement('div');d.style.color='#777';d.style.fontSize='12px';d.textContent='Hələ heç nə izlənməyib.';h.appendChild(d);}
-  for(const m of histMovies){let b=document.createElement('button');b.textContent='▶ '+m.title;b.onclick=()=>openMovie(m.id);h.appendChild(b)}
+  for(const m of histMovies){let b=document.createElement('button');b.type='button';b.textContent='▶ '+m.title;b.onclick=()=>openMovie(m.id);h.appendChild(b)}
 }
 
 function render(){
@@ -318,6 +322,7 @@ function render(){
     let card=document.createElement('article');
     card.className='movie';
     let fav=document.createElement('button');
+    fav.type='button';
     fav.className='fav-btn '+(favorites.includes(m.id)?'active':'');
     fav.textContent='♥';
     fav.onclick=e=>{e.stopPropagation();favorites=favorites.includes(m.id)?favorites.filter(x=>x!==m.id):[...favorites,m.id];render()};
@@ -332,7 +337,7 @@ function render(){
     card.append(poster,title,meta);
     if(isAdmin){
       let a=document.createElement('div');a.className='movie-actions';
-      let d=document.createElement('button');d.className='delete-btn';d.textContent='Sil';d.onclick=()=>deleteMovie(m.id);
+      let d=document.createElement('button');d.type='button';d.className='delete-btn';d.textContent='Sil';d.onclick=()=>deleteMovie(m.id);
       a.appendChild(d);card.appendChild(a);
     }
     grid.appendChild(card);
@@ -376,26 +381,25 @@ function switchAuthTab(tab){
 async function registerUser(){
   try{
     let name=$('regName').value.trim(),email=$('regEmail').value.trim(),password=$('regPassword').value,code=$('regCode').value.trim();
-    if(!name)throw Error('Adınızı daxil edin.');
-    if(!email)throw Error('Gmail ünvanınızı daxil edin.');
-    if(!password)throw Error('Şifrə daxil edin.');
-    if(code!=='qeseyfilmplay2026')throw Error('Yanlış abunəlik kodu! Zəhmət olmasa düzgün kodu daxil edin.');
+    if(!name||!email||!password||code!=='qeseyfilmplay2026'){
+      throw Error('Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
+    }
     
     await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+    alert('Uğurlu giriş, xoş gəldiniz!');
     let s=await api('/api/session');
     currentUser=s.user;
     isAdmin=s.isAdmin;
     closeAuthModal();
     movies=await api('/api/movies');
     render();
-    alert('Qeydiyyat uğurludur!');
   }catch(e){alert(e.message)}
 }
 
 async function loginUser(){
   try{
     let email=$('loginEmail').value.trim(),password=$('loginPassword').value;
-    if(!email||!password)throw Error('Gmail və şifrəni daxil edin.');
+    if(!email||!password)throw Error('Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
     await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
     let s=await api('/api/session');
     currentUser=s.user;
@@ -403,6 +407,7 @@ async function loginUser(){
     closeAuthModal();
     movies=await api('/api/movies');
     render();
+    alert('Uğurlu giriş, xoş gəldiniz!');
   }catch(e){alert(e.message)}
 }
 
@@ -429,7 +434,7 @@ function closeAdminModal(){$('adminModal').classList.remove('show')}
 async function loginAdmin(){
   try{
     let pass=$('adminPassInput').value;
-    if(pass!=='turan2010')throw Error('Yanlış admin kodu!');
+    if(pass!=='turan2010')throw Error('Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
     await api('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})});
     isAdmin=true;
     currentUser=null;
@@ -437,7 +442,7 @@ async function loginAdmin(){
     $('adminAddForm').style.display='block';
     movies=await api('/api/movies');
     render();
-    alert('Admin girişi uğurludur');
+    alert('Uğurlu giriş, xoş gəldiniz!');
   }catch(e){alert(e.message)}
 }
 
