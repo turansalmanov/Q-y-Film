@@ -215,7 +215,8 @@ main{padding:0 5% 50px}
       <button type="button" class="action" onclick="loginAdmin()">Daxil ol</button>
     </div>
     <div id="adminAddForm" style="display:none">
-      <p style="color:#ddd;font-size:13px">Film faylı və afişa yükləyin:</p>
+      <p style="color:#ddd;font-size:13px" id="adminFormTitle">Film faylı və afişa yükləyin:</p>
+      <input type="hidden" id="editMovieId" value="">
       <label class="form-label">Filmin adı *</label><input id="mTitle" placeholder="Filmin adı">
       <label class="form-label">İl</label><input type="number" id="mYear" placeholder="2026">
       <label class="form-label">Ölkə</label><input id="mCountry" placeholder="Azərbaycan">
@@ -229,7 +230,7 @@ main{padding:0 5% 50px}
       <label class="form-label">Film Video Faylı (Video seçin - MP4 və s.) *</label>
       <input type="file" id="mVideoFile" accept="video/*">
       
-      <button type="button" class="action" onclick="saveMovieData()">Filmi Yadda Saxla</button>
+      <button type="button" class="action" id="saveMovieBtn" onclick="saveMovieData()">Filmi Yadda Saxla</button>
       <button type="button" class="action" style="margin-top:8px;background:#444" onclick="adminLogout()">Admin Çıxışı</button>
     </div>
   </div>
@@ -240,14 +241,10 @@ let movies=[],isAdmin=false,currentUser=null,activeGenre='Hamısı',favorites=[]
 const $=id=>document.getElementById(id);
 
 async function api(url,opts={}){
-  try{
-    const r=await fetch(url,{credentials:'include',...opts});
-    const d=await r.json().catch(()=>({error:'Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.'}));
-    if(!r.ok)throw Error(d.error||'Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
-    return d;
-  }catch(err){
-    throw Error('Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
-  }
+  const r=await fetch(url,{credentials:'include',...opts});
+  const d=await r.json().catch(()=>({error:'Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.'}));
+  if(!r.ok)throw Error(d.error||'Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
+  return d;
 }
 
 async function init(){
@@ -337,8 +334,22 @@ function render(){
     card.append(poster,title,meta);
     if(isAdmin){
       let a=document.createElement('div');a.className='movie-actions';
-      let d=document.createElement('button');d.type='button';d.className='delete-btn';d.textContent='Sil';d.onclick=()=>deleteMovie(m.id);
-      a.appendChild(d);card.appendChild(a);
+      
+      let editBtn=document.createElement('button');
+      editBtn.type='button';
+      editBtn.className='delete-btn';
+      editBtn.style.background='#cca300';
+      editBtn.textContent='Düzəliş et';
+      editBtn.onclick=()=>startEditMovie(m.id);
+      
+      let d=document.createElement('button');
+      d.type='button';
+      d.className='delete-btn';
+      d.textContent='Sil';
+      d.onclick=()=>deleteMovie(m.id);
+      
+      a.append(editBtn,d);
+      card.appendChild(a);
     }
     grid.appendChild(card);
   }
@@ -386,13 +397,15 @@ async function registerUser(){
     }
     
     await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
-    alert('Uğurlu giriş, xoş gəldiniz!');
+    await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    
     let s=await api('/api/session');
-    currentUser=s.user;
+    currentUser=name;
     isAdmin=s.isAdmin;
     closeAuthModal();
     movies=await api('/api/movies');
     render();
+    alert('Uğurlu giriş, xoş gəldiniz!');
   }catch(e){alert(e.message)}
 }
 
@@ -428,6 +441,9 @@ function openAdminModal(){
   $('adminModal').classList.add('show');
   $('adminLoginForm').style.display=isAdmin?'none':'block';
   $('adminAddForm').style.display=isAdmin?'block':'none';
+  $('editMovieId').value='';
+  $('adminFormTitle').textContent='Film faylı və afişa yükləyin:';
+  $('saveMovieBtn').textContent='Filmi Yadda Saxla';
 }
 function closeAdminModal(){$('adminModal').classList.remove('show')}
 
@@ -448,29 +464,59 @@ async function loginAdmin(){
 
 async function adminLogout(){await logoutUser();closeAdminModal()}
 
+function startEditMovie(id){
+  let m=movies.find(x=>x.id===id);
+  if(!m)return;
+  openAdminModal();
+  $('adminLoginForm').style.display='none';
+  $('adminAddForm').style.display='block';
+  $('editMovieId').value=m.id;
+  $('mTitle').value=m.title||'';
+  $('mYear').value=m.year||'';
+  $('mCountry').value=m.country||'';
+  $('mGenre').value=m.genre||'Aksiyon';
+  $('mDesc').value=m.desc||m.description||'';
+  $('adminFormTitle').textContent='Filmi redaktə et:';
+  $('saveMovieBtn').textContent='Dəyişiklikləri Yadda Saxla';
+}
+
 async function saveMovieData(){
   try{
-    let title=$('mTitle').value.trim(),poster=$('mPosterFile').files[0],video=$('mVideoFile').files[0];
-    if(!title||!poster||!video)throw Error('Filmin adını, afişa şəkil faylını və video faylını seçin.');
+    let editId=$('editMovieId').value;
+    let title=$('mTitle').value.trim();
+    if(!title)throw Error('Filmin adını daxil edin.');
+    
     let fd=new FormData();
     fd.append('title',title);
     fd.append('year',$('mYear').value);
     fd.append('country',$('mCountry').value);
     fd.append('genre',$('mGenre').value);
     fd.append('desc',$('mDesc').value);
-    fd.append('poster',poster);
-    fd.append('video',video);
-    let b=$('adminAddForm').querySelector('button.action');
+    
+    let poster=$('mPosterFile').files[0];
+    let video=$('mVideoFile').files[0];
+    if(poster) fd.append('poster',poster);
+    if(video) fd.append('video',video);
+    
+    let b=$('saveMovieBtn');
     b.disabled=true;
     b.textContent='Yüklənir...';
-    await api('/api/movies',{method:'POST',body:fd});
+    
+    if(editId){
+      await api('/api/movies/'+editId,{method:'PUT',body:fd});
+    }else{
+      if(!poster||!video)throw Error('Yeni film üçün afişa və video faylı seçilməlidir.');
+      await api('/api/movies',{method:'POST',body:fd});
+    }
+    
     movies=await api('/api/movies');
     $('mTitle').value='';$('mYear').value='';$('mCountry').value='';$('mDesc').value='';$('mPosterFile').value='';$('mVideoFile').value='';
+    $('editMovieId').value='';
     closeAdminModal();
     render();
-    alert('Film əlavə edildi.');
+    alert('Əməliyyat uğurla tamamlandı!');
   }catch(e){alert(e.message)}finally{
-    let b=$('adminAddForm').querySelector('button.action');
+    let b=$('saveMovieBtn');
     if(b){b.disabled=false;b.textContent='Filmi Yadda Saxla';}
   }
 }
