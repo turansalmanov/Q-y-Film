@@ -191,7 +191,7 @@ main{padding:0 5% 50px}
     </div>
 
     <div id="loginFormSection" style="display:none;">
-      <p style="color:#ddd;font-size:13px">Gmail və şifrənizlə daxil olun:</p>
+      <p style="color:#ddd;font-size:13px">Gmail ünvanınızla daxil olun:</p>
       
       <label class="form-label">Gmail ünvanınız</label>
       <input type="email" id="loginEmail" autocomplete="off" placeholder="ornek@gmail.com">
@@ -397,15 +397,13 @@ async function registerUser(){
     }
     
     await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
-    await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-    
-    let s=await api('/api/session');
-    currentUser=name;
-    isAdmin=s.isAdmin;
-    closeAuthModal();
-    movies=await api('/api/movies');
-    render();
-    alert('Uğurlu giriş, xoş gəldiniz!');
+    alert('Uğurlu qeydiyyat! İndi daxil ola bilərsiniz.');
+    switchAuthTab('login');
+    $('loginEmail').value = email;
+    $('regName').value='';
+    $('regEmail').value='';
+    $('regPassword').value='';
+    $('regCode').value='';
   }catch(e){alert(e.message)}
 }
 
@@ -413,6 +411,7 @@ async function loginUser(){
   try{
     let email=$('loginEmail').value.trim(),password=$('loginPassword').value;
     if(!email||!password)throw Error('Səhv kod! Birdə sınayın və yaxud qeydiyyatdan keçin.');
+    
     await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
     let s=await api('/api/session');
     currentUser=s.user;
